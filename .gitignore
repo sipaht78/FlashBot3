@@ -1,0 +1,7 @@
+# Project exclude paths
+/node_modules/
+/src/myTypeScript.js
+/src/secrets.ts
+# Project exclude paths
+/src/BundleRPC.js
+/src/secrets.js

@@ -1,0 +1,11 @@
+{
+  "name": "FlashBot2",
+  "version": "1.0.0",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@flashbots/ethers-provider-bundle": "^0.6.1",
+    "ethers": "^5.7.2"
+  }
+}
