@@ -5,9 +5,6 @@ import {BundleRPC} from "./BundleRPC";
 import {AppSecrets} from "./secrets";
 
 
-
-
-
 const flashBot_goerli: BlockBuilder = {
     name: "FlashBot",
     url: "https://relay-goerli.flashbots.net",
@@ -43,9 +40,9 @@ main([flashBot_goerli, blockNative_goerli], goerliNet)
 
 async function main(blockBuilders: BlockBuilder[], ethNetwork: EthNetwork) {
     const provider = new ethers.providers.JsonRpcProvider({url: ethNetwork.apiUrl});
-    const wallet = new ethers.Wallet(AppSecrets.PRIVATE_KEY6, provider)
+    const wallet = new ethers.Wallet(AppSecrets.PRIVATE_KEY_A, provider)
 
-    const authSigner = new ethers.Wallet(AppSecrets.PRIVATE_KEY8, provider);
+    const authSigner = new ethers.Wallet(AppSecrets.PRIVATE_KEY_AUTH, provider);
 
     const bundleRPC = new BundleRPC(authSigner)
     const flashBotsProvider = await FlashbotsBundleProvider.create(provider, authSigner, blockBuilders[0].url, ethNetwork.name);
@@ -60,24 +57,24 @@ async function main(blockBuilders: BlockBuilder[], ethNetwork: EthNetwork) {
     let nonce = await wallet.getTransactionCount()
 
     let tx1 = await wallet.signTransaction({
-        to: "0xE4BaacFB751c7659ba5b790056e3f01BD66BE69C",
+        to: AppSecrets.ACCOUNT_B,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         maxFeePerGas: feeData.maxFeePerGas,
         type: 2,
         gasLimit: 21000,
         chainId: ethNetwork.chainId,
         nonce: BigNumber.from(nonce),
-        value: ethers.utils.parseUnits("0.000008", "ether"),
+        value: ethers.utils.parseUnits("0.000001", "ether"),
     })
     let tx2 = await wallet.signTransaction({
-        to: "0x774568C687978E9AFAF5F8b7Bf582cDd46dC2F6d",
+        to: AppSecrets.ACCOUNT_C,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         maxFeePerGas: feeData.maxFeePerGas,
         type: 2,
         gasLimit: 21000,
         chainId: ethNetwork.chainId,
         nonce: BigNumber.from(nonce + 1),
-        value: ethers.utils.parseUnits("0.000008", "ether"),
+        value: ethers.utils.parseUnits("0.000001", "ether"),
     })
 
     // let signedTransactions = await flashBotsProvider.signBundle(bundle);
@@ -96,7 +93,7 @@ async function main(blockBuilders: BlockBuilder[], ethNetwork: EthNetwork) {
     for (let i = 1; i <= 10; i++) {
         for (let blockBuilder of blockBuilders) {
             // await delay(1000);
-            bundleRPC.eth_sendBundle([tx1, tx2], blockNumber + i, blockBuilder)
+            await bundleRPC.eth_sendBundle([tx1, tx2], blockNumber + i, blockBuilder)
         }
         // bundleRPC.eth_sendBundle(signedTransactions, blockNumber + i, blockNative_goerli)
     }
@@ -118,9 +115,9 @@ async function main(blockBuilders: BlockBuilder[], ethNetwork: EthNetwork) {
 
 
 async function do_simulation(signedTransactions: Array<string>, blockNumber: number, blockBuilder: BlockBuilder, bundleRPC: BundleRPC): Promise<SimulationResponseSuccess> {
-    let t1 = new Date().getMilliseconds()
+    let t1 = new Date().getTime()
     let simResult = await bundleRPC.eth_callBundle(signedTransactions, blockNumber, blockBuilder)
-    let t2 = new Date().getMilliseconds()
+    let t2 = new Date().getTime()
     console.log(`Simulation time = ${t2 - t1}ms`);
     console.log(simResult)
     return simResult
